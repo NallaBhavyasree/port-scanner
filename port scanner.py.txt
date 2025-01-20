@@ -1,0 +1,32 @@
+import socket
+import threading
+
+# Function to check if a port is open
+def scan_port(ip, port):
+    try:
+        # Create a socket object
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)  # Set a timeout of 1 second for the connection attempt
+        result = sock.connect_ex((ip, port))  # Try to connect to the given IP and port
+        if result == 0:  # If connection was successful, port is open
+            print(f"Port {port} is open on {ip}")
+        sock.close()
+    except socket.error:
+        pass  # Ignore errors and just continue scanning
+
+# Function to perform the scanning on a range of ports
+def scan_ports(ip, start_port, end_port):
+    threads = []
+    for port in range(start_port, end_port + 1):
+        # Create a new thread to scan the port
+        thread = threading.Thread(target=scan_port, args=(ip, port))
+        threads.append(thread)
+        thread.start()
+
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+
+if __name__ == "__main__":
+    target_ip = input("Enter the target IP address: ")
+    scan_ports(target_ip, 1, 65535)  # Scanning all ports from 1 to 65535
